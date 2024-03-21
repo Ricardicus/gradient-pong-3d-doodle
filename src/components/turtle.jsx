@@ -222,14 +222,14 @@ class Turtle extends Component {
       [0, -0.5, 4],
     ];
     this.moveFactor = [0.000346, 0.000346];
-    this.targetStartSpeed = 0.05;
+    this.targetStartSpeed = 0.02;
     this.targetSpeed = this.targetStartSpeed;
 
     this.errorHit = 0.1;
     this.relax = false;
 
-    this.walls = [1.3, 0.5, 5.2];
-    this.simulationSpeed = 50;
+    this.walls = [1.3, 0.7, 5.2];
+    this.simulationSpeed = 20;
     this.maxSpeed = 0.1;
     this.hasHit = false;
 
@@ -274,7 +274,6 @@ class Turtle extends Component {
       hasHit: this.hasHit
     };
 
-    this.generatePointsThread = setInterval(this.loop, this.simulationSpeed);
   }
 
   sumUpTo(arr, i) {
@@ -529,17 +528,15 @@ class Turtle extends Component {
         this.points.push(armPoints);
       }
     }
-    var target = this.updateTarget();
+    var updates_i = this.updateTarget();
 
     var updates = {
-      target: target,
+      ...updates_i,
       alphas: alphas_tot,
       omegas: omegas_tot,
       points: this.points,
     };
     this.setState(updates);
-    //console.log("omegas", this.state.omegas);
-    //console.log("alphas", this.state.alphas);
   }
 
   loop() {
@@ -564,23 +561,19 @@ class Turtle extends Component {
 
     var tip = this.getCurrentPoint(0);
     var error1 = this.Norm([
-      this.state.target[0] - tip[0],
-      this.state.target[1] - tip[1],
-      this.state.target[2] - tip[2],
+      target[0] - tip[0],
+      target[1] - tip[1],
+      target[2] - tip[2],
     ]);
     tip = this.getCurrentPoint(1);
     var error2 = this.Norm([
-      this.state.target[0] - tip[0],
-      this.state.target[1] - tip[1],
-      this.state.target[2] - tip[2],
+      target[0] - tip[0],
+      target[1] - tip[1],
+      target[2] - tip[2],
     ]);
 
-    if ( Math.abs(target[2]) < 1.0 ) {
+    if ( Math.abs(target[2]) < 0.5 ) {
       hasHit = false;
-    }
-
-    for (var i = 0; i < target.length; i++) {
-      target[i] = target[i] + this.state.dtarget[i] * this.state.targetSpeed;
     }
 
     var newdtarget = [
@@ -590,21 +583,28 @@ class Turtle extends Component {
     ];
     for (var i = 0; i < newdtarget.length; i++) {
       if (target[i] > this.state.walls[i] || target[i] < -this.state.walls[i]) {
-        newdtarget[i] = -newdtarget[i];
+        if ( !hasHit ) {
+          newdtarget[i] = -newdtarget[i];
+        }
         relax = false;
-        if (i == 2) {
+        if (i == 2 && !hasHit) {
           if (target[i] < 0) {
             score1 += 1;
             newhits = 0;
             targetSpeed = this.state.targetStartSpeed;
             increaseSpeed = false;
+            hasHit = true;
           } else {
             score2 += 1;
             newhits = 0;
             targetSpeed = this.state.targetStartSpeed;
             increaseSpeed = false;
+            hasHit = true;
           }
         }
+      }
+      if ( i == 1 && target[i] < 0 ) {
+        newdtarget[i] = -newdtarget[i];
       }
     }
     if (error1 < this.state.errorHit) {
@@ -638,30 +638,34 @@ class Turtle extends Component {
     if (targetSpeed > this.state.maxSpeed) {
       targetSpeed = this.state.maxSpeed;
     }
+    for (var i = 0; i < target.length; i++) {
+      target[i] = target[i] + this.state.dtarget[i] * this.state.targetSpeed;
+    }
 
     if (score1 != this.state.scores[0] || score2 != this.state.scores[1]) {
       this.state.updateCB({ score1: score1, score2: score2 });
     }
 
+    var maxhits = this.state.maxhits;
     if (newhits != this.state.hits) {
-      var maxhits = this.state.maxhits;
       if ( newhits > this.state.maxhits ) {
         maxhits = newhits;
       }
       this.state.updateCB({ hits: newhits, maxhits: maxhits });
     }
 
-    this.setState({
+    var updates = {
       dtarget: newdtarget,
       relax: relax,
       scores: [score1, score2],
       targetSpeed: targetSpeed,
       hits: newhits,
-      hasHit: hasHit
-    });
+      hasHit: hasHit,
+      target: target,
+      maxhits: maxhits
+    };
 
-    this.target = target;
-    return target;
+    return updates;
   }
 
   drawArms(index, radiuses, omegas, alphas) {
@@ -698,6 +702,8 @@ class Turtle extends Component {
 
   componentDidMount() {
     console.log("turtle mounted");
+    clearInterval(this.generatePointsThread);
+    this.generatePointsThread = setInterval(this.loop, this.simulationSpeed);
   }
 
   shouldComponentUpdate(nextProps) {
@@ -725,20 +731,19 @@ class Turtle extends Component {
         }
       }
     }
-    if (this.target[0] != this.renderedTarget[0]) {
+    if (this.state.target[0] != this.renderedTarget[0]) {
       return true;
     }
-    if (this.target[1] != this.renderedTarget[1]) {
+    if (this.state.target[1] != this.renderedTarget[1]) {
       return true;
     }
-    if (this.target[2] != this.renderedTarget[2]) {
+    if (this.state.target[2] != this.renderedTarget[2]) {
       return true;
     }
     return false;
   }
 
   componentDidUpdate(props) {
-    this.setState({ points: this.points, target: this.target });
   }
 
   render() {
