@@ -1,4 +1,4 @@
-# Gradient decent in football
+# Angular gradient descent football
 
 Making some gradient based optimization on two angular arms trying to score.
 
