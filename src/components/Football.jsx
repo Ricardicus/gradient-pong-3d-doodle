@@ -99,6 +99,10 @@ function TransparentWall(props) {
 class Football extends Component {
   constructor(props) {
     super(props);
+    this.radiuses = [
+      [0.5, 0.5, 0.5, 0.3],
+      [0.5, 0.5, 0.5, 0.3],
+    ];
     this.state = {
       lr1: 0.01,
       lr2: 0.01,
@@ -107,6 +111,7 @@ class Football extends Component {
       hits: 0,
       maxhits: 0,
       error: <div></div>,
+      radiuses: this.radiuses,
     };
     this.handleNewInput = this.handleNewInput.bind(this);
   }
@@ -175,6 +180,7 @@ This process is done using gradient optimization.`}
                     lr2={this.state.lr2}
                     colors={["yellow", "blue"]}
                     updateCB={this.handleNewInput}
+                    radiuses={this.state.radiuses}
                   />
                 </Suspense>
               </Canvas>

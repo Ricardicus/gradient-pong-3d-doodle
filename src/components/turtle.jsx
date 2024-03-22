@@ -203,10 +203,7 @@ class Turtle extends Component {
     window.runningSim = true;
 
     console.log("turtle constructor");
-    this.radiuses = [
-      [0.5, 0.5, 0.5, 0.3],
-      [0.5, 0.5, 0.5, 0.3],
-    ];
+    this.radiuses = props.radiuses;
     this.alphas = [
       [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
       [0.5, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -271,9 +268,8 @@ class Turtle extends Component {
       hits: this.hits,
       maxhits: this.maxhits,
       maxDiff: this.maxDiff,
-      hasHit: this.hasHit
+      hasHit: this.hasHit,
     };
-
   }
 
   sumUpTo(arr, i) {
@@ -340,13 +336,13 @@ class Turtle extends Component {
       var t0Diff = this.state.target[0] - tip[0];
       var t1Diff = this.state.target[1] - tip[1];
 
-      if ( Math.abs(t0Diff) > this.state.maxTDiff ) {
+      if (Math.abs(t0Diff) > this.state.maxTDiff) {
         t0Diff = this.state.maxTDiff * Math.sign(t0Diff);
       }
-      if ( Math.abs(t1Diff) > this.state.maxTDiff ) {
+      if (Math.abs(t1Diff) > this.state.maxTDiff) {
         t1Diff = this.state.maxTDiff * Math.sign(t1Diff);
       }
-      if ( Math.abs(t2Diff) > this.state.maxTDiff ) {
+      if (Math.abs(t2Diff) > this.state.maxTDiff) {
         t2Diff = this.state.maxTDiff * Math.sign(t2Diff);
       }
 
@@ -397,13 +393,13 @@ class Turtle extends Component {
       var t0Diff = this.state.target[0] - tip[0];
       var t1Diff = this.state.target[1] - tip[1];
 
-      if ( Math.abs(t0Diff) > this.state.maxTDiff ) {
+      if (Math.abs(t0Diff) > this.state.maxTDiff) {
         t0Diff = this.state.maxTDiff * Math.sign(t0Diff);
       }
-      if ( Math.abs(t1Diff) > this.state.maxTDiff ) {
+      if (Math.abs(t1Diff) > this.state.maxTDiff) {
         t1Diff = this.state.maxTDiff * Math.sign(t1Diff);
       }
-      if ( Math.abs(t2Diff) > this.state.maxTDiff ) {
+      if (Math.abs(t2Diff) > this.state.maxTDiff) {
         t2Diff = this.state.maxTDiff * Math.sign(t2Diff);
       }
 
@@ -496,7 +492,11 @@ class Turtle extends Component {
 
       // absolute value of the difference between the target and the current Z
       var diffZ = Math.abs(targetZ - this.state.startpos[index][2]);
-      if (diffZ > this.state.diffZ || ( index == 0 && this.state.dtarget[2] > 0 ) || ( index == 1 && this.state.dtarget[2] < 0 ) ) {
+      if (
+        diffZ > this.state.diffZ ||
+        (index == 0 && this.state.dtarget[2] > 0) ||
+        (index == 1 && this.state.dtarget[2] < 0)
+      ) {
         // relax the arm
         var omegas = this.relaxOmegas(index);
         var alphas = this.relaxAlphas(index);
@@ -572,7 +572,7 @@ class Turtle extends Component {
       target[2] - tip[2],
     ]);
 
-    if ( Math.abs(target[2]) < 0.5 ) {
+    if (Math.abs(target[2]) < 0.5) {
       hasHit = false;
     }
 
@@ -583,7 +583,7 @@ class Turtle extends Component {
     ];
     for (var i = 0; i < newdtarget.length; i++) {
       if (target[i] > this.state.walls[i] || target[i] < -this.state.walls[i]) {
-        if ( !hasHit ) {
+        if (!hasHit) {
           newdtarget[i] = -newdtarget[i];
         }
         relax = false;
@@ -603,7 +603,7 @@ class Turtle extends Component {
           }
         }
       }
-      if ( i == 1 && target[i] < 0 ) {
+      if (i == 1 && target[i] < 0) {
         newdtarget[i] = -newdtarget[i];
       }
     }
@@ -632,6 +632,14 @@ class Turtle extends Component {
         hasHit = true;
       }
     }
+
+    if (Math.abs(target[0]) > 1.9) {
+      target[0] = 0;
+    }
+    if (Math.abs(target[1]) > 1.9) {
+      target[1] = 0;
+    }
+
     if (increaseSpeed) {
       targetSpeed = targetSpeed * this.state.speedIncreaseFactor;
     }
@@ -648,7 +656,7 @@ class Turtle extends Component {
 
     var maxhits = this.state.maxhits;
     if (newhits != this.state.hits) {
-      if ( newhits > this.state.maxhits ) {
+      if (newhits > this.state.maxhits) {
         maxhits = newhits;
       }
       this.state.updateCB({ hits: newhits, maxhits: maxhits });
@@ -662,7 +670,7 @@ class Turtle extends Component {
       hits: newhits,
       hasHit: hasHit,
       target: target,
-      maxhits: maxhits
+      maxhits: maxhits,
     };
 
     return updates;
@@ -743,8 +751,7 @@ class Turtle extends Component {
     return false;
   }
 
-  componentDidUpdate(props) {
-  }
+  componentDidUpdate(props) {}
 
   render() {
     this.renderedPoints = [...this.state.points];
